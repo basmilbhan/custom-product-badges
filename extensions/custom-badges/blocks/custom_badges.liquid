@@ -1,0 +1,136 @@
+<script>
+  (function () {
+    var productId = '{{ product.id }}';
+    var apiUrl = 'https://come-printers-ping-extend.trycloudflare.com/api/badge?productId=' + productId;
+
+    fetch(apiUrl)
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
+        if (data && data.badge) {
+          showBadge(data.badge);
+        }
+      })
+      .catch(function (error) {
+        console.log('Badge error:', error);
+      });
+
+    function showBadge(badge) {
+      var maincontainer = document.getElementById('shopify-section-{{ section.id }}');
+      if (!maincontainer) return;
+
+      var imgcontainer = maincontainer.querySelector('img').parentElement;
+      var container = document.createElement('div');
+      imgcontainer.style.position = 'relative';
+      imgcontainer.style.height = '100%';
+      imgcontainer.style.width = '100%';
+      imgcontainer.appendChild(container);
+      var span = document.createElement('span');
+      span.className = 'product-badge';
+      span.textContent = badge.name;
+      span.style.backgroundColor = badge.color;
+      span.style.color = '#f3f3f3ff';
+      span.style.fontSize = '{{ block.settings.badge_size | default: 12 }}px';
+
+      container.appendChild(span);
+      setPosition(span, '{{ block.settings.badge_position }}');
+    }
+
+    // Position the badge
+    function setPosition(element, position) {
+      var pos = position || 'top-left';
+      element.style.position = 'absolute';
+      element.style.zIndex = '10';
+
+      if (pos === 'top-right') {
+        element.style.top = '10px';
+        element.style.right = '10px';
+      } else if (pos === 'bottom-left') {
+        element.style.bottom = '10px';
+        element.style.left = '10px';
+      } else if (pos === 'bottom-right') {
+        element.style.bottom = '10px';
+        element.style.right = '10px';
+      } else {
+        element.style.top = '10px';
+        element.style.left = '10px';
+      }
+    }
+  })();
+  
+</script>
+
+<style>
+
+
+  .product-badge {
+    display: inline-block;
+    padding: 6px 18px;
+    border-radius: {{ block.settings.badge_border_radius }}px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s;
+    white-space: nowrap;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .product-badge {
+      font-size: 10px;
+      padding: 4px 8px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Product Badge",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "badge_position",
+      "label": "Position",
+      "options": [
+        { "value": "top-left", "label": "Top Left" },
+        { "value": "top-right", "label": "Top Right" },
+        { "value": "bottom-left", "label": "Bottom Left" },
+        { "value": "bottom-right", "label": "Bottom Right" }
+      ],
+      "default": "top-left"
+    },
+    {
+      "type": "range",
+      "id": "badge_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Font Size",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "badge_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Corner Radius",
+      "default": 8
+    }
+  ]
+}
+{% endschema %}
